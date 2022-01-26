@@ -10,6 +10,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include "implot.h"
+#include <random>
 
 namespace ImPlot {
 	struct ScrollingBuffer {
@@ -111,21 +112,27 @@ private:
 	double t = 0.0f;
 	float r;
 	float w;
-	float L;
+	double L;
 	double x;
 	double dx;
 	double last_x;
 	double last_dx;
+	float epsilon = 0.00001;
 
 	float current_angle = 0.0f;
 
 	bool blocks_need_creation = true;
+	bool add_d = false;
 
 	std::unique_ptr<Line> line;
 	std::unique_ptr<Block> block;
 
 	std::vector<float> points;
 	std::vector<unsigned int> quads;
+
+	std::random_device rd{};
+	std::mt19937 gen{ rd() };
+	std::normal_distribution<double> d;
 
 	ImPlot::ScrollingBuffer _x = {20000};
 	ImPlot::ScrollingBuffer _dx = { 20000 };

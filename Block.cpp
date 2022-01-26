@@ -117,6 +117,7 @@ Arm::Arm(Shader sh) :
 	color = { 1, 0.05f, 0, 1.0f };
 	line = std::make_unique<Line>(sh);
 	block = std::make_unique<Block>(glm::vec2{ 0,0 }, sh);
+	d = std::normal_distribution<double>(0, 1);
 	update_object();
 }
 
@@ -150,7 +151,7 @@ void Arm::Menu()
 			L = r;
 		}
 	}
-	if (ImGui::InputFloat("L", &L)) {
+	if (ImGui::InputDouble("L", &L)) {
 		need_update = true;
 		if (L < r) {
 			L = r;
@@ -159,6 +160,9 @@ void Arm::Menu()
 	if (ImGui::InputFloat("w", &w)) {
 		need_update = true;
 	}
+
+	ImGui::SliderFloat("epsilon",&epsilon,0.0000001f,0.001f,"%.7f");
+	ImGui::Checkbox("enable error", &add_d);
 
 
 	if (ImPlot::BeginPlot("Wykres 1")) {
@@ -233,13 +237,18 @@ void Arm::update_object()
 		glEnableVertexAttribArray(1);
 	}
 
+	double Le = L;
+	if (add_d) {
+		Le += d(gen) * epsilon;
+	}
+
 	glm::vec2 point1 = { r * glm::sin(current_angle),r * glm::cos(current_angle) };
 
-	glm::vec2 point2 = { point1.x + std::sqrt(L * (double)L - (double)(point1.y * point1.y)) ,0 };
+	glm::vec2 point2 = { point1.x + std::sqrt(Le * (double)Le - (double)(point1.y * point1.y)) ,0 };
 
 	last_x = x;
 	last_dx = dx;
-	x = point2.x - L ;
+	x = point2.x - Le ;
 	float ddx = 0.0f;
 	
 	dx = 0.0f;
